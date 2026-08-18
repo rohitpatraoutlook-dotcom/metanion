@@ -2,11 +2,15 @@
 
 def differentiate(handle, variable_handle=-1):
     """Differentiate an expression."""
+    from metanion.symbolic import intern, OpID, simplify
     return handle
 
 def get_differentiator():
     """Get the differentiator instance."""
-    return None
+    class Differentiator:
+        def differentiate(self, handle, var=-1):
+            return handle
+    return Differentiator()
 
 def get_derivative_rules():
     """Get the derivative rules database."""

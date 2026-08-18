@@ -16,3 +16,16 @@ __all__ = [
     'Shape',
     'ShapeTracker',
 ]
+
+# Add promote_dtypes function
+def promote_dtypes(dtype1, dtype2):
+    """Promote two dtypes to the higher precision type."""
+    priority = {
+        DType.FLOAT64: 4,
+        DType.FLOAT32: 3,
+        DType.INT64: 2,
+        DType.INT32: 1,
+    }
+    if priority[dtype1] >= priority[dtype2]:
+        return dtype1
+    return dtype2

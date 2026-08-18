@@ -1,338 +1,173 @@
 """
-Tensor buffer abstraction over the memory arena.
-Provides raw data storage with shape and stride information.
+Tensor buffer for Metanion - handles raw memory storage with struct packing.
 """
 
-from typing import Optional, Union, List, Tuple, Any
+import struct
+from typing import Optional, Tuple, Any, Union, List
 import math
 
-from ..exceptions import TensorError, MemoryAllocationError
-from .dtype_system import DType, is_numeric_dtype
+from .dtype_system import DType
 from .memory_arena import get_arena
-from .tensor_shape import Shape, Strides, ShapeTracker, compute_strides, compute_size
+from .tensor_shape import Shape, ShapeTracker
+from ..exceptions import TensorError
 
 
 class TensorBuffer:
-    """
-    Raw buffer storage for tensor data.
-    Manages memory in the arena and provides access methods.
-    """
-    
-    __slots__ = (
-        '_offset', '_shape', '_strides', '_dtype', '_size',
-        '_readonly', '_owns_memory'
-    )
+    """Raw buffer for tensor data using memory arena."""
     
     def __init__(
         self,
         offset: int,
         shape: Shape,
-        strides: Optional[Strides] = None,
+        strides: Optional[Tuple[int, ...]] = None,
         dtype: DType = DType.FLOAT64,
         readonly: bool = False,
         owns_memory: bool = True
     ):
-        """
-        Initialize a tensor buffer.
-        
-        Args:
-            offset: Byte offset in the memory arena.
-            shape: Shape tuple.
-            strides: Strides tuple. If None, computed from shape.
-            dtype: Data type.
-            readonly: Whether the buffer is read-only.
-            owns_memory: Whether to free memory on deletion.
-        """
-        ShapeTracker.validate_shape(shape)
-        
         self._offset = offset
         self._shape = shape
         self._dtype = dtype
         self._readonly = readonly
         self._owns_memory = owns_memory
+        self._size = ShapeTracker.compute_size(shape)
         
-        # Compute strides if not provided
         if strides is None:
-            self._strides = compute_strides(shape, dtype.itemsize())
+            self._strides = self._compute_strides()
         else:
             self._strides = strides
         
-        # Compute total size
-        self._size = compute_size(shape)
+        # For 1D tensors, store a simple flat index mapping
+        self._is_flat = len(shape) == 1 or shape == ()
     
-    @property
-    def offset(self) -> int:
-        """Get the buffer offset."""
-        return self._offset
+    def _compute_strides(self) -> Tuple[int, ...]:
+        strides = []
+        stride = self._dtype.itemsize()
+        for dim in reversed(self._shape):
+            strides.append(stride)
+            stride *= dim
+        return tuple(reversed(strides))
     
     @property
     def shape(self) -> Shape:
-        """Get the buffer shape."""
         return self._shape
     
     @property
-    def strides(self) -> Strides:
-        """Get the buffer strides."""
+    def strides(self) -> Tuple[int, ...]:
         return self._strides
     
     @property
     def dtype(self) -> DType:
-        """Get the buffer dtype."""
         return self._dtype
     
     @property
     def size(self) -> int:
-        """Get the number of elements."""
         return self._size
     
     @property
     def nbytes(self) -> int:
-        """Get the total bytes used by the buffer."""
         return self._size * self._dtype.itemsize()
     
     @property
-    def readonly(self) -> bool:
-        """Check if buffer is read-only."""
-        return self._readonly
+    def offset(self) -> int:
+        return self._offset
     
-    def _get_memoryview(self) -> memoryview:
-        """Get a memoryview of the buffer."""
-        arena = get_arena()
-        return arena.get_buffer(self._offset, self.nbytes)
-    
-    def _get_index(self, idx: Union[int, Tuple[int, ...]]) -> int:
-        """
-        Convert multi-dimensional index to flat offset.
+    def _get_index(self, idx: Tuple[int, ...]) -> int:
+        """Convert multi-dimensional index to flat offset."""
+        # Handle scalar case
+        if self._shape == ():
+            return self._offset
         
-        Args:
-            idx: Index tuple.
-            
-        Returns:
-            Flat byte offset.
-            
-        Raises:
-            IndexError: If index is out of bounds.
-        """
-        if isinstance(idx, int):
-            idx = (idx,)
+        # Handle 1D case with simple index
+        if len(self._shape) == 1 and len(idx) == 1:
+            flat_idx = idx[0]
+            if flat_idx < 0 or flat_idx >= self._size:
+                raise IndexError(f"Index {flat_idx} out of bounds for size {self._size}")
+            return self._offset + flat_idx * self._strides[0]
         
+        # Handle 2D case with tuple index
+        if len(self._shape) == 2 and len(idx) == 2:
+            flat_idx = idx[0] * self._shape[1] + idx[1]
+            if flat_idx < 0 or flat_idx >= self._size:
+                raise IndexError(f"Index {idx} out of bounds for shape {self._shape}")
+            return self._offset + flat_idx * self._dtype.itemsize()
+        
+        # General case
         if len(idx) != len(self._shape):
             raise IndexError(
                 f"Index {idx} has {len(idx)} dimensions, "
-                f"but buffer has {len(self._shape)}"
+                f"buffer has {len(self._shape)} dimensions"
             )
         
         byte_offset = 0
         for i, (dim, stride, index) in enumerate(zip(self._shape, self._strides, idx)):
             if index < 0 or index >= dim:
-                raise IndexError(f"Index {index} out of bounds for dimension {i} (size {dim})")
+                raise IndexError(
+                    f"Index {index} out of bounds for dimension {i} (size {dim})"
+                )
             byte_offset += index * stride
         
         return self._offset + byte_offset
     
-    def _get_slice_indices(self, idx: Tuple[Union[int, slice, None], ...]) -> Tuple[Shape, Strides, int, int]:
-        """
-        Compute shape, strides, and offset for a slice.
-        
-        Args:
-            idx: Slice tuple.
-            
-        Returns:
-            Tuple of (new_shape, new_strides, new_offset, length).
-        """
-        new_shape = []
-        new_strides = []
-        new_offset = self._offset
-        
-        for i, (dim, stride, item) in enumerate(zip(self._shape, self._strides, idx)):
-            if isinstance(item, int):
-                # Integer index: dimension is removed
-                new_offset += item * stride
-                continue
-            
-            if isinstance(item, slice):
-                start = item.start or 0
-                stop = item.stop or dim
-                step = item.step or 1
-                
-                if start < 0:
-                    start = dim + start
-                if stop < 0:
-                    stop = dim + stop
-                
-                start = max(0, min(start, dim))
-                stop = max(0, min(stop, dim))
-                
-                if start >= stop:
-                    length = 0
-                else:
-                    length = (stop - start + step - 1) // step
-                
-                new_shape.append(length)
-                new_strides.append(stride * step)
-                new_offset += start * stride
-            else:
-                # None or Ellipsis - handle later
-                raise NotImplementedError(f"Advanced indexing {item} not yet supported")
-        
-        if not new_shape:
-            # Scalar
-            new_shape = ()
-            new_strides = ()
-        
-        return tuple(new_shape), tuple(new_strides), new_offset, len(new_shape)
+    def _pack_value(self, value: Union[int, float]) -> bytes:
+        if self._dtype == DType.FLOAT64:
+            return struct.pack('d', float(value))
+        elif self._dtype == DType.FLOAT32:
+            return struct.pack('f', float(value))
+        elif self._dtype == DType.INT64:
+            return struct.pack('q', int(value))
+        elif self._dtype == DType.INT32:
+            return struct.pack('i', int(value))
+        else:
+            raise TypeError(f"Unsupported dtype for packing: {self._dtype}")
     
-    def getitem(self, idx: Union[int, Tuple[Union[int, slice, None], ...]]) -> Any:
-        """
-        Get item(s) from the buffer.
-        
-        Args:
-            idx: Index or slice.
-            
-        Returns:
-            Value (scalar) or TensorBuffer (sliced view).
-        """
+    def _unpack_value(self, data: bytes) -> Union[int, float]:
+        if self._dtype == DType.FLOAT64:
+            return struct.unpack('d', data)[0]
+        elif self._dtype == DType.FLOAT32:
+            return struct.unpack('f', data)[0]
+        elif self._dtype == DType.INT64:
+            return struct.unpack('q', data)[0]
+        elif self._dtype == DType.INT32:
+            return struct.unpack('i', data)[0]
+        else:
+            raise TypeError(f"Unsupported dtype for unpacking: {self._dtype}")
+    
+    def getitem(self, idx: Union[int, Tuple[int, ...]]) -> Union[int, float]:
+        """Get a single element from the buffer."""
         if isinstance(idx, int):
             idx = (idx,)
         
-        # Handle scalar indexing
-        if all(isinstance(i, int) for i in idx):
-            flat_idx = self._get_index(idx)
-            arena = get_arena()
-            data = arena.read(flat_idx, self._dtype.itemsize())
-            
-            # Convert bytes to Python value
-            if self._dtype == DType.FLOAT64:
-                return float.from_bytes(data, 'little')
-            elif self._dtype == DType.FLOAT32:
-                return float.from_bytes(data, 'little')
-            elif self._dtype == DType.INT64:
-                return int.from_bytes(data, 'little')
-            elif self._dtype == DType.INT32:
-                return int.from_bytes(data, 'little')
-            else:
-                raise ValueError(f"Unsupported dtype: {self._dtype}")
+        flat_idx = self._get_index(idx)
+        arena = get_arena()
+        data = arena.read(flat_idx, self._dtype.itemsize())
         
-        # Handle slicing
-        new_shape, new_strides, new_offset, ndim = self._get_slice_indices(idx)
-        
-        if new_shape == () and ndim == 0:
-            # Scalar result
-            arena = get_arena()
-            data = arena.read(new_offset, self._dtype.itemsize())
-            if self._dtype == DType.FLOAT64:
-                return float.from_bytes(data, 'little')
-            elif self._dtype == DType.FLOAT32:
-                return float.from_bytes(data, 'little')
-            elif self._dtype == DType.INT64:
-                return int.from_bytes(data, 'little')
-            elif self._dtype == DType.INT32:
-                return int.from_bytes(data, 'little')
-        
-        # Return a view
-        return TensorBuffer(
-            offset=new_offset,
-            shape=new_shape,
-            strides=new_strides,
-            dtype=self._dtype,
-            readonly=self._readonly,
-            owns_memory=False  # View doesn't own memory
-        )
+        return self._unpack_value(data)
     
     def setitem(self, idx: Union[int, Tuple[int, ...]], value: Union[int, float]) -> None:
-        """
-        Set item in the buffer.
-        
-        Args:
-            idx: Index.
-            value: Value to set.
-            
-        Raises:
-            TensorError: If buffer is read-only.
-        """
+        """Set a single element in the buffer."""
         if self._readonly:
-            raise TensorError("Cannot set value on read-only buffer")
+            raise ValueError("Buffer is read-only")
         
         if isinstance(idx, int):
             idx = (idx,)
         
         flat_idx = self._get_index(idx)
         arena = get_arena()
-        
-        # Convert value to bytes
-        if isinstance(value, float):
-            if self._dtype == DType.FLOAT64:
-                data = value.to_bytes(8, 'little')
-            elif self._dtype == DType.FLOAT32:
-                data = value.to_bytes(4, 'little')
-            else:
-                raise TypeError(f"Cannot assign float to dtype {self._dtype}")
-        elif isinstance(value, int):
-            if self._dtype in (DType.FLOAT64, DType.FLOAT32):
-                value = float(value)
-                if self._dtype == DType.FLOAT64:
-                    data = value.to_bytes(8, 'little')
-                else:
-                    data = value.to_bytes(4, 'little')
-            elif self._dtype == DType.INT64:
-                data = value.to_bytes(8, 'little', signed=True)
-            elif self._dtype == DType.INT32:
-                data = value.to_bytes(4, 'little', signed=True)
-            else:
-                raise TypeError(f"Unsupported dtype: {self._dtype}")
-        else:
-            raise TypeError(f"Cannot assign type {type(value)} to buffer")
-        
+        data = self._pack_value(value)
         arena.write(flat_idx, data)
     
     def fill(self, value: Union[int, float]) -> None:
-        """
-        Fill the entire buffer with a value.
-        
-        Args:
-            value: Value to fill.
-        """
         if self._readonly:
-            raise TensorError("Cannot fill read-only buffer")
+            raise ValueError("Buffer is read-only")
         
         arena = get_arena()
-        
-        if isinstance(value, float):
-            if self._dtype == DType.FLOAT64:
-                data = value.to_bytes(8, 'little') * self._size
-            elif self._dtype == DType.FLOAT32:
-                data = value.to_bytes(4, 'little') * self._size
-            else:
-                raise TypeError(f"Cannot fill dtype {self._dtype} with float")
-        elif isinstance(value, int):
-            if self._dtype in (DType.FLOAT64, DType.FLOAT32):
-                value = float(value)
-                if self._dtype == DType.FLOAT64:
-                    data = value.to_bytes(8, 'little') * self._size
-                else:
-                    data = value.to_bytes(4, 'little') * self._size
-            elif self._dtype == DType.INT64:
-                data = value.to_bytes(8, 'little', signed=True) * self._size
-            elif self._dtype == DType.INT32:
-                data = value.to_bytes(4, 'little', signed=True) * self._size
-            else:
-                raise TypeError(f"Unsupported dtype: {self._dtype}")
-        else:
-            raise TypeError(f"Cannot fill with type {type(value)}")
-        
+        data = self._pack_value(value) * self._size
         arena.write(self._offset, data)
     
     def copy(self) -> 'TensorBuffer':
-        """
-        Create a deep copy of the buffer.
-        
-        Returns:
-            New TensorBuffer with copied data.
-        """
         arena = get_arena()
         new_offset = arena.allocate(self.nbytes)
         
-        # Copy data
         data = arena.read(self._offset, self.nbytes)
         arena.write(new_offset, data)
         
@@ -346,17 +181,8 @@ class TensorBuffer:
         )
     
     def view(self, shape: Shape) -> 'TensorBuffer':
-        """
-        Create a view of the buffer with a new shape.
-        
-        Args:
-            shape: New shape (must have same number of elements).
-            
-        Returns:
-            New TensorBuffer view.
-        """
         new_shape = ShapeTracker.reshape(self._shape, shape)
-        new_strides = compute_strides(new_shape, self._dtype.itemsize())
+        new_strides = self._compute_strides()
         
         return TensorBuffer(
             offset=self._offset,
@@ -368,24 +194,54 @@ class TensorBuffer:
         )
     
     def to_bytes(self) -> bytes:
-        """Return the raw bytes of the buffer."""
         arena = get_arena()
         return arena.read(self._offset, self.nbytes)
     
+    def to_list(self) -> List[Union[int, float]]:
+        """Convert buffer to a flat list of values."""
+        result = []
+        for i in range(self._size):
+            if len(self._shape) == 1:
+                result.append(self.getitem(i))
+            elif self._shape == ():
+                if i == 0:
+                    result.append(self.getitem(()))
+            elif len(self._shape) == 2:
+                row = i // self._shape[1]
+                col = i % self._shape[1]
+                result.append(self.getitem((row, col)))
+            else:
+                # For higher dimensions, compute index tuple
+                idx = []
+                remaining = i
+                for dim in reversed(self._shape):
+                    if dim > 0:
+                        idx.append(remaining % dim)
+                        remaining //= dim
+                    else:
+                        idx.append(0)
+                idx.reverse()
+                try:
+                    result.append(self.getitem(tuple(idx)))
+                except:
+                    result.append(0.0)
+        return result
+    
     def __len__(self) -> int:
-        """Return the number of elements."""
         return self._size
     
     def __repr__(self) -> str:
-        """String representation."""
-        return (f"TensorBuffer(shape={self._shape}, dtype={self._dtype.name}, "
-                f"size={self._size}, nbytes={self.nbytes})")
+        return (
+            f"TensorBuffer(shape={self._shape}, "
+            f"dtype={self._dtype.name}, "
+            f"size={self._size}, "
+            f"nbytes={self.nbytes})"
+        )
     
     def __del__(self):
-        """Free memory if we own it."""
         if self._owns_memory and self._offset is not None:
             try:
                 arena = get_arena()
                 arena.free(self._offset)
             except:
-                pass  # Ignore errors during cleanup
+                pass

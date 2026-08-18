@@ -6,76 +6,95 @@ __version__ = "0.1.0"
 __author__ = "Metanion Team"
 
 # Core
-from .core import Tensor, DType, Shape
+from .core import Tensor, DType, Shape, get_arena, reset_arena, ShapeTracker, TensorBuffer
 
 # Symbolic
 from .symbolic import (
-    OpID, OpCategory, intern, lookup, get_pool, reset_pool,
-    simplify, get_depth, count_nodes_in_subtree
+    OpID, OpCategory, intern, lookup, simplify,
+    get_pool, reset_pool, get_depth, count_nodes_in_subtree,
+    get_op_name, get_op_arity, is_binary_op, is_unary_op,
+    ExpressionNode, ExpressionNodeFactory, get_all_operation_ids
 )
 
 # Compile
-try:
-    from .compile import compile_handle, StraightLineProgram
-except ImportError:
-    def compile_handle(h): return lambda x: x
-    class StraightLineProgram: pass
+from .compile import compile_handle, StraightLineProgram
+
+# Algebra
+from .algebra import get_rewrite_system
 
 # Calculus
-try:
-    from .calculus import differentiate, get_differentiator
-except ImportError:
-    def differentiate(h, v=-1): return h
-    def get_differentiator(): return None
+from .calculus import differentiate, get_differentiator, get_derivative_rules
 
 # Model
 try:
-    from .model import MetanionModel, create_model, train, predict
+    from .model import MetanionModel
 except ImportError:
-    class MetanionModel: pass
-    def create_model(*args, **kwargs): return MetanionModel()
-    def train(*args, **kwargs): return {}
-    def predict(x): return x
+    MetanionModel = None
 
-# Engine
+# GP
 try:
-    from .metanion_engine import MetanionEngine, get_engine
+    from .gp import (
+        GPIndividual, IndividualFactory,
+        PopulationInitializer, InitializationMethod,
+        TournamentSelection, RouletteSelection, RankSelection, ElitismSelection,
+        SubtreeCrossover, OnePointCrossover, UniformCrossover,
+        PointMutation, SubtreeMutation, ShrinkMutation,
+        FitnessEvaluator, PopulationManager,
+        BloatControl, BloatController
+    )
 except ImportError:
-    class MetanionEngine: pass
-    def get_engine(): return MetanionEngine()
+    GPIndividual = None
+    IndividualFactory = None
+    PopulationInitializer = None
+    InitializationMethod = None
+    TournamentSelection = None
+    RouletteSelection = None
+    RankSelection = None
+    ElitismSelection = None
+    SubtreeCrossover = None
+    OnePointCrossover = None
+    UniformCrossover = None
+    PointMutation = None
+    SubtreeMutation = None
+    ShrinkMutation = None
+    FitnessEvaluator = None
+    PopulationManager = None
+    BloatControl = None
+    BloatController = None
+
+# Utils
+from .utils import TreePrinter, get_cost_model, get_time_profiler
 
 # IO
-try:
-    from .io import BinaryEncoder, BinaryDecoder, CheckpointManager
-except ImportError:
-    pass
+from .io import BinaryEncoder, BinaryDecoder, CheckpointManager
+
+# Runtime
+from .runtime import get_jit_cache, get_gc_controller
+
+# Engine
+from .metanion_engine import MetanionEngine, get_engine
 
 __all__ = [
-    '__version__',
-    '__author__',
-    'Tensor',
-    'DType',
-    'Shape',
-    'OpID',
-    'OpCategory',
-    'intern',
-    'lookup',
-    'get_pool',
-    'reset_pool',
-    'simplify',
-    'get_depth',
-    'count_nodes_in_subtree',
-    'compile_handle',
-    'StraightLineProgram',
-    'differentiate',
-    'get_differentiator',
+    '__version__', '__author__',
+    'Tensor', 'DType', 'Shape',
+    'get_arena', 'reset_arena', 'ShapeTracker', 'TensorBuffer',
+    'OpID', 'OpCategory', 'intern', 'lookup', 'simplify',
+    'get_pool', 'reset_pool', 'get_depth', 'count_nodes_in_subtree',
+    'get_op_name', 'get_op_arity', 'is_binary_op', 'is_unary_op',
+    'ExpressionNode', 'ExpressionNodeFactory', 'get_all_operation_ids',
+    'compile_handle', 'StraightLineProgram',
+    'get_rewrite_system',
+    'differentiate', 'get_differentiator', 'get_derivative_rules',
     'MetanionModel',
-    'create_model',
-    'train',
-    'predict',
-    'MetanionEngine',
-    'get_engine',
-    'BinaryEncoder',
-    'BinaryDecoder',
-    'CheckpointManager',
+    'GPIndividual', 'IndividualFactory',
+    'PopulationInitializer', 'InitializationMethod',
+    'TournamentSelection', 'RouletteSelection', 'RankSelection', 'ElitismSelection',
+    'SubtreeCrossover', 'OnePointCrossover', 'UniformCrossover',
+    'PointMutation', 'SubtreeMutation', 'ShrinkMutation',
+    'FitnessEvaluator', 'PopulationManager',
+    'BloatControl', 'BloatController',
+    'TreePrinter', 'get_cost_model', 'get_time_profiler',
+    'BinaryEncoder', 'BinaryDecoder', 'CheckpointManager',
+    'get_jit_cache', 'get_gc_controller',
+    'MetanionEngine', 'get_engine',
 ]

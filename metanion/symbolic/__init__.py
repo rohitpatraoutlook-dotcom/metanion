@@ -19,6 +19,12 @@ def simplify(handle):
     return simplify_handle(handle, lookup_func, create_func)
 
 
+def get_all_operation_ids():
+    """Get all operation IDs."""
+    from .op_enum import OpID
+    return list(OpID)
+
+
 __all__ = [
     'OpID',
     'OpCategory',
@@ -36,4 +42,5 @@ __all__ = [
     'simplify',
     'ExpressionNode',
     'ExpressionNodeFactory',
+    'get_all_operation_ids',
 ]

@@ -7,54 +7,56 @@ class OpID(IntEnum):
     IDENTITY = 1
     CONST_ZERO = 2
     CONST_ONE = 3
-    ADD = 4
-    SUB = 5
-    MUL = 6
-    DIV = 7
-    POWER = 8
-    SIN = 9
-    COS = 10
-    TANH = 11
-    EXP = 12
-    LOG = 13
-    SQUARE = 14
-    CUBE = 15
-    SQRT = 16
-    RELU = 17
-    SIGMOID = 18
-    NEG = 19
-    INVERSE = 20
-    LOG2 = 21
-    LOG10 = 22
-    ASIN = 23
-    ACOS = 24
-    ATAN = 25
-    SINH = 26
-    COSH = 27
-    COTH = 28
-    ASINH = 29
-    ACOSH = 30
-    ATANH = 31
-    ERF = 32
-    GAMMA = 33
-    SUM = 34
-    MEAN = 35
-    MAX = 36
-    MIN = 37
-    WHERE = 38
-    GREATER = 39
-    LESS = 40
-    EQUAL = 41
-    DERIVATIVE = 42
-    SECOND_DERIVATIVE = 43
-    INTEGRAL = 44
-    CLIP = 45
-    SIGN = 46
-    ROUND = 47
-    FLOOR = 48
-    CEIL = 49
-    STOP_GRADIENT = 50
-    IDENTITY_GRAD = 51
+    CONST = 4
+    VAR = 5              # NEW: variable with index
+    ADD = 6
+    SUB = 7
+    MUL = 8
+    DIV = 9
+    POWER = 10
+    SIN = 11
+    COS = 12
+    TANH = 13
+    EXP = 14
+    LOG = 15
+    SQUARE = 16
+    CUBE = 17
+    SQRT = 18
+    RELU = 19
+    SIGMOID = 20
+    NEG = 21
+    INVERSE = 22
+    LOG2 = 23
+    LOG10 = 24
+    ASIN = 25
+    ACOS = 26
+    ATAN = 27
+    SINH = 28
+    COSH = 29
+    COTH = 30
+    ASINH = 31
+    ACOSH = 32
+    ATANH = 33
+    ERF = 34
+    GAMMA = 35
+    SUM = 36
+    MEAN = 37
+    MAX = 38
+    MIN = 39
+    WHERE = 40
+    GREATER = 41
+    LESS = 42
+    EQUAL = 43
+    DERIVATIVE = 44
+    SECOND_DERIVATIVE = 45
+    INTEGRAL = 46
+    CLIP = 47
+    SIGN = 48
+    ROUND = 49
+    FLOOR = 50
+    CEIL = 51
+    STOP_GRADIENT = 52
+    IDENTITY_GRAD = 53
 
 
 class OpCategory:
@@ -73,11 +75,12 @@ class OpCategory:
 
 
 def get_op_name(op: OpID) -> str:
-    """Get the name of an operation."""
     names = {
         OpID.IDENTITY: "identity",
         OpID.CONST_ZERO: "0",
         OpID.CONST_ONE: "1",
+        OpID.CONST: "const",
+        OpID.VAR: "var",
         OpID.ADD: "+",
         OpID.SUB: "-",
         OpID.MUL: "*",
@@ -131,16 +134,18 @@ def get_op_name(op: OpID) -> str:
 
 
 def get_op_arity(op: OpID) -> int:
-    """Get the arity of an operation."""
+    if op in [OpID.CONST_ZERO, OpID.CONST_ONE, OpID.CONST, OpID.VAR]:
+        return 0
     unary_ops = {
-        OpID.IDENTITY, OpID.CONST_ZERO, OpID.CONST_ONE, OpID.NEG, OpID.INVERSE,
-        OpID.SIN, OpID.COS, OpID.TANH, OpID.EXP, OpID.LOG, OpID.SQUARE, OpID.CUBE,
-        OpID.SQRT, OpID.RELU, OpID.SIGMOID, OpID.LOG2, OpID.LOG10, OpID.ASIN,
-        OpID.ACOS, OpID.ATAN, OpID.SINH, OpID.COSH, OpID.COTH, OpID.ASINH,
-        OpID.ACOSH, OpID.ATANH, OpID.ERF, OpID.GAMMA, OpID.SUM, OpID.MEAN,
-        OpID.MAX, OpID.MIN, OpID.DERIVATIVE, OpID.SECOND_DERIVATIVE, OpID.INTEGRAL,
-        OpID.SIGN, OpID.ROUND, OpID.FLOOR, OpID.CEIL, OpID.STOP_GRADIENT,
-        OpID.IDENTITY_GRAD
+        OpID.IDENTITY, OpID.NEG, OpID.INVERSE, OpID.SIN, OpID.COS,
+        OpID.TANH, OpID.EXP, OpID.LOG, OpID.SQUARE, OpID.CUBE,
+        OpID.SQRT, OpID.RELU, OpID.SIGMOID, OpID.LOG2, OpID.LOG10,
+        OpID.ASIN, OpID.ACOS, OpID.ATAN, OpID.SINH, OpID.COSH,
+        OpID.COTH, OpID.ASINH, OpID.ACOSH, OpID.ATANH, OpID.ERF,
+        OpID.GAMMA, OpID.SUM, OpID.MEAN, OpID.MAX, OpID.MIN,
+        OpID.DERIVATIVE, OpID.SECOND_DERIVATIVE, OpID.INTEGRAL,
+        OpID.SIGN, OpID.ROUND, OpID.FLOOR, OpID.CEIL,
+        OpID.STOP_GRADIENT, OpID.IDENTITY_GRAD
     }
     if op in unary_ops:
         return 1
@@ -153,22 +158,19 @@ def get_op_arity(op: OpID) -> int:
 
 
 def is_binary_op(op: OpID) -> bool:
-    """Check if an operation is binary."""
     return get_op_arity(op) == 2
 
 
 def is_unary_op(op: OpID) -> bool:
-    """Check if an operation is unary."""
     return get_op_arity(op) == 1
 
 
 def is_constant_op(op: OpID) -> bool:
-    """Check if an operation is a constant."""
-    return op in {OpID.CONST_ZERO, OpID.CONST_ONE}
+    return op in {OpID.CONST_ZERO, OpID.CONST_ONE, OpID.CONST}
 
 
 def is_differentiable_op(op: OpID) -> bool:
-    """Check if an operation is differentiable."""
-    non_diff = {OpID.CONST_ZERO, OpID.CONST_ONE, OpID.WHERE, OpID.GREATER,
-                OpID.LESS, OpID.EQUAL, OpID.SUM, OpID.MEAN, OpID.MAX, OpID.MIN}
+    non_diff = {OpID.CONST_ZERO, OpID.CONST_ONE, OpID.CONST, OpID.VAR,
+                OpID.WHERE, OpID.GREATER, OpID.LESS, OpID.EQUAL,
+                OpID.SUM, OpID.MEAN, OpID.MAX, OpID.MIN}
     return op not in non_diff

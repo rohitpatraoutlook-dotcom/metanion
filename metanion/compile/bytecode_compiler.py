@@ -1,93 +1,83 @@
 """
-Bytecode compiler for Metanion - generates Python functions from expression trees.
+Bytecode compiler with COMPOSE support and safe operations.
 """
 
-import types
 import math
 from ..symbolic import lookup, get_op_name, OpID
 
 
 def compile_handle(handle, n_features=1):
-    """
-    Compile an expression to a Python function that accepts a list `x` of length n_features.
-    """
     def compile_node(handle):
         node = lookup(handle)
         if node is None:
             return "0.0"
         op = node[0]
+        
         if op == OpID.IDENTITY:
-            # For backward compatibility: use first variable if only one feature
             return "x[0]"
         elif op == OpID.CONST_ZERO:
             return "0.0"
         elif op == OpID.CONST_ONE:
             return "1.0"
         elif op == OpID.CONST:
-            val = node[1]
-            return str(float(val))
+            return str(float(node[1]))
         elif op == OpID.VAR:
             idx = node[1]
-            if idx < n_features:
-                return f"x[{idx}]"
-            else:
-                # Fallback to 0 if index out of range
-                return "0.0"
+            return f"x[{idx}]" if idx < n_features else "0.0"
         elif op == OpID.ADD:
-            left = compile_node(node[1])
-            right = compile_node(node[2])
-            return f"({left} + {right})"
+            return f"({compile_node(node[1])} + {compile_node(node[2])})"
         elif op == OpID.SUB:
-            left = compile_node(node[1])
-            right = compile_node(node[2])
-            return f"({left} - {right})"
+            return f"({compile_node(node[1])} - {compile_node(node[2])})"
         elif op == OpID.MUL:
-            left = compile_node(node[1])
-            right = compile_node(node[2])
-            return f"({left} * {right})"
+            return f"({compile_node(node[1])} * {compile_node(node[2])})"
         elif op == OpID.DIV:
-            left = compile_node(node[1])
-            right = compile_node(node[2])
-            return f"(safe_div({left}, {right}))"
+            return f"(safe_div({compile_node(node[1])}, {compile_node(node[2])}))"
         elif op == OpID.POWER:
-            left = compile_node(node[1])
-            right = compile_node(node[2])
-            return f"(safe_pow({left}, {right}))"
-        elif op == OpID.SIN:
-            arg = compile_node(node[1])
-            return f"(safe_sin({arg}))"
-        elif op == OpID.COS:
-            arg = compile_node(node[1])
-            return f"(safe_cos({arg}))"
-        elif op == OpID.EXP:
-            arg = compile_node(node[1])
-            return f"(safe_exp({arg}))"
-        elif op == OpID.LOG:
-            arg = compile_node(node[1])
-            return f"(safe_log({arg}))"
-        elif op == OpID.SQUARE:
-            arg = compile_node(node[1])
-            return f"({arg} * {arg})"
+            return f"(safe_pow({compile_node(node[1])}, {compile_node(node[2])}))"
         elif op == OpID.SQRT:
-            arg = compile_node(node[1])
-            return f"(safe_sqrt({arg}))"
+            return f"(safe_sqrt({compile_node(node[1])}))"
+        elif op == OpID.SQUARE:
+            return f"({compile_node(node[1])} * {compile_node(node[1])})"
+        elif op == OpID.CUBE:
+            return f"({compile_node(node[1])} * {compile_node(node[1])} * {compile_node(node[1])})"
+        elif op == OpID.EXP:
+            return f"(safe_exp({compile_node(node[1])}))"
+        elif op == OpID.LOG:
+            return f"(safe_log({compile_node(node[1])}))"
+        elif op == OpID.LOG10:
+            return f"(safe_log10({compile_node(node[1])}))"
+        elif op == OpID.SIN:
+            return f"(safe_sin({compile_node(node[1])}))"
+        elif op == OpID.COS:
+            return f"(safe_cos({compile_node(node[1])}))"
+        elif op == OpID.TAN:
+            return f"(safe_tan({compile_node(node[1])}))"
+        elif op == OpID.ABS:
+            return f"(safe_abs({compile_node(node[1])}))"
+        elif op == OpID.INVERSE:
+            return f"(safe_inv({compile_node(node[1])}))"
         elif op == OpID.NEG:
-            arg = compile_node(node[1])
-            return f"(-{arg})"
+            return f"(-{compile_node(node[1])})"
+        elif op == OpID.COMPOSE:
+            # f(g(x)) = f(g(x))
+            return f"({compile_node(node[1])}({compile_node(node[2])}))"
         else:
             return "0.0"
 
     expr_str = compile_node(handle)
 
-    # Inject safe functions
     namespace = {
         'safe_div': lambda a,b: a/b if abs(b) > 1e-12 else 0.0,
         'safe_pow': lambda a,b: a**b if not (a<0 and abs(b-round(b))>1e-12) else 0.0,
         'safe_sin': math.sin,
         'safe_cos': math.cos,
+        'safe_tan': math.tan,
         'safe_exp': math.exp,
         'safe_log': lambda x: math.log(x) if x > 0 else 0.0,
+        'safe_log10': lambda x: math.log10(x) if x > 0 else 0.0,
         'safe_sqrt': lambda x: math.sqrt(x) if x >= 0 else 0.0,
+        'safe_abs': abs,
+        'safe_inv': lambda x: 1.0/x if abs(x) > 1e-12 else 0.0,
     }
 
     func_code = f"def _compiled(x): return {expr_str}"

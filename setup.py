@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="metanion",
-    version="0.1.0",
+    version="2.0.0",
     author="Rohit Patra",
     author_email="rohitpatra@outlook.com",
     description="A zero-weight symbolic tensor engine",

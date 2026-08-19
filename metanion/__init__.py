@@ -2,7 +2,7 @@
 Metanion - A Zero-Weight Symbolic Tensor Engine
 """
 
-__version__ = "0.2.0"
+__version__ = "3.0.1"
 __author__ = "Metanion Team"
 
 # Core
@@ -34,8 +34,14 @@ from .gp import (
     PointMutation, SubtreeMutation, ShrinkMutation,
     FitnessEvaluator, PopulationManager,
     BloatControl, BloatController,
-    SymbolicRegularization
+    SymbolicRegularization,
+    safe_div, safe_log, safe_log10, safe_sqrt, safe_pow,
+    safe_sin, safe_cos, safe_tan, safe_exp, safe_inv,
+    safe_abs, safe_square, safe_cube
 )
+
+# Research
+from .research import run_gp, print_expr, test_expression
 
 # API
 from .api import Metanion
@@ -71,6 +77,10 @@ __all__ = [
     'FitnessEvaluator', 'PopulationManager',
     'BloatControl', 'BloatController',
     'SymbolicRegularization',
+    'safe_div', 'safe_log', 'safe_log10', 'safe_sqrt', 'safe_pow',
+    'safe_sin', 'safe_cos', 'safe_tan', 'safe_exp', 'safe_inv',
+    'safe_abs', 'safe_square', 'safe_cube',
+    'run_gp', 'print_expr', 'test_expression',
     'Metanion',
     'TreePrinter', 'get_cost_model', 'get_time_profiler',
     'BinaryEncoder', 'BinaryDecoder', 'CheckpointManager',

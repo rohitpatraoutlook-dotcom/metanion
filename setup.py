@@ -6,7 +6,7 @@ import re
 with open("metanion/__init__.py", "r") as f:
     content = f.read()
     version_match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
-    version = version_match.group(1) if version_match else "3.0.0"
+    version = version_match.group(1) if version_match else "3.5.0"
 
 # Read README
 with open("README.md", "r", encoding="utf-8") as f:

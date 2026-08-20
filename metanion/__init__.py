@@ -2,7 +2,7 @@
 Metanion - A Zero-Weight Symbolic Tensor Engine
 """
 
-__version__ = "3.0.1"
+__version__ = "3.5.0"
 __author__ = "Metanion Team"
 
 # Core
@@ -40,8 +40,16 @@ from .gp import (
     safe_abs, safe_square, safe_cube
 )
 
-# Research
-from .research import run_gp, print_expr, test_expression
+# Research - using absolute import since research is at same level
+try:
+    from research import run_gp, print_expr, test_expression
+except ImportError:
+    try:
+        import sys
+        sys.path.insert(0, '.')
+        from research import run_gp, print_expr, test_expression
+    except ImportError:
+        print("Warning: research module not found. Some features may not work.")
 
 # API
 from .api import Metanion

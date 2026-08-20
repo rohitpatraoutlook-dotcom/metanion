@@ -1,0 +1,965 @@
+Metadata-Version: 2.4
+Name: metanion
+Version: 3.5.0
+Summary: A zero-weight symbolic tensor engine for interpretable machine learning
+Home-page: https://github.com/rohitpatraoutlook-dotcom/metanion
+Author: Rohit Patra
+Author-email: rohitpatra@outlook.com
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.19.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Metanion
+
+A Zero-Weight Symbolic Tensor Engine for Interpretable Machine Learning
+
+[![PyPI version](https://badge.fury.io/py/metanion.svg)](https://badge.fury.io/py/metanion)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/metanion)](https://pepy.tech/project/metanion)
+
+## Introduction
+
+Metanion is a Python library for symbolic regression and interpretable machine learning. It discovers mathematical equations from data using genetic programming. Unlike traditional machine learning models that store numerical weights, Metanion stores operation sequences. This makes the models fully interpretable and human-readable.
+
+The library is designed for researchers, scientists, and engineers who need to understand the relationships in their data. Metanion is particularly useful for scientific discovery, where finding an equation is more valuable than making a prediction.
+
+Metanion was developed from the ground up with a focus on interpretability, speed, and ease of use. It requires no GPU and runs efficiently on any Python environment. The library is open source and available under the MIT license.
+
+## What is Metanion?
+
+Metanion is a zero-weight symbolic tensor engine. The term "zero-weight" means that the model does not store numerical weights. Instead, it stores symbolic expressions. Each expression is a sequence of mathematical operations.
+
+For example, instead of storing weight 2.5 and bias 1.0, Metanion stores the expression "(x + x) + 1". This expression is equivalent to 2*x + 1, but it is human-readable and interpretable.
+
+The engine uses genetic programming to search for the best expression that fits the data. It evolves a population of expressions over multiple generations, using mutation and crossover to explore the search space.
+
+Metanion supports multiple input features, making it suitable for multivariate regression. It also supports tensor operations, allowing it to discover equations for each row and column of a tensor.
+
+The engine is built with safety in mind. All operations are wrapped with safety checks to prevent division by zero, log of negative numbers, and square root of negative numbers. This ensures that the discovered equations are always valid and numerically stable.
+
+## Why Metanion?
+
+Traditional machine learning models have several limitations that Metanion addresses:
+
+First, neural networks are black boxes. It is impossible to understand why a neural network makes a particular prediction. Metanion outputs a human-readable equation, making it fully interpretable.
+
+Second, neural networks require large amounts of data and computational resources. Metanion works with small datasets and runs on any computer without GPU.
+
+Third, neural networks store millions of numerical weights. These weights are meaningless to humans. Metanion stores operation sequences that are meaningful and interpretable.
+
+Fourth, neural networks are vulnerable to adversarial attacks. Metanion's equations are robust and stable.
+
+Fifth, neural networks cannot be used for scientific discovery. Metanion is designed specifically for discovering mathematical relationships and physical laws.
+
+Sixth, neural networks require extensive hyperparameter tuning. Metanion has fewer hyperparameters and is easier to use.
+
+Seventh, neural networks are memory intensive. Metanion has a minimal memory footprint.
+
+Eighth, neural networks are difficult to deploy. Metanion models are simple equations that can be deployed anywhere.
+
+Ninth, neural networks cannot be easily shared or reproduced. Metanion equations can be shared as text.
+
+Tenth, neural networks are not explainable. Metanion provides full explainability.
+
+## Key Features
+
+Metanion offers a comprehensive set of features for symbolic regression and interpretable machine learning.
+
+No Numerical Weights - Metanion stores operation sequences instead of numerical weights. This makes the models interpretable and lightweight.
+
+Explainable AI - The discovered equations are human-readable and can be understood by anyone with basic mathematical knowledge.
+
+Fast Inference - Metanion uses JIT compilation to compile expressions to Python bytecode. This makes inference extremely fast.
+
+Symbolic Differentiation - Metanion can differentiate expressions symbolically. This is useful for sensitivity analysis and gradient-based optimization.
+
+Lightweight - Metanion has a minimal memory footprint. Models are stored as text files.
+
+Multivariate Support - Metanion supports multiple input features, making it suitable for complex regression problems.
+
+Tensor Scale - Metanion can discover equations for each row and column of a tensor, enabling scalable symbolic regression.
+
+Island GP - Metanion uses Island Genetic Programming with multiple sub-populations evolving in parallel.
+
+Safe Operations - All operations are wrapped with safety checks to prevent mathematical errors.
+
+Symbolic Regularization - Metanion adapts the complexity penalty based on data linearity.
+
+Batch Training - Metanion supports batch training for large datasets.
+
+Progressive Refinement - Metanion refines equations progressively over multiple batches.
+
+Constant Optimization - Metanion optimizes constants using gradient descent.
+
+Model Persistence - Models can be saved and loaded from files.
+
+JIT Compilation - Expressions are compiled to Python bytecode for fast execution.
+
+Recursion Safety - Depth limits prevent recursion errors.
+
+Polynomial Features - Metanion supports polynomial features for non-linear relationships.
+
+Composition Operator - Functions can be composed using the COMPOSE operator.
+
+Feature Penalty - Metanion penalizes expressions that ignore features.
+
+Verbose Mode - Progress can be printed during training.
+
+Random Seed Control - Results are reproducible with random seed control.
+
+Model Summary - A comprehensive summary of the model can be printed.
+
+Equation Printing - Discovered equations can be printed in human-readable format.
+
+## Installation
+
+Metanion can be installed from PyPI using pip. This is the recommended installation method.
+
+$ pip install metanion
+
+To install the latest development version from GitHub, clone the repository and install in development mode.
+
+$ git clone https://github.com/rohitpatraoutlook-dotcom/metanion.git
+$ cd metanion
+$ pip install -e .
+
+Metanion requires Python 3.8 or higher and NumPy 1.19.0 or higher. The dependencies are automatically installed when using pip.
+
+To verify the installation, run the following command.
+
+$ python -c "import metanion; print(metanion.__version__)"
+
+This should output the version number of Metanion.
+
+For development, additional dependencies can be installed using the dev extras.
+
+$ pip install metanion[dev]
+
+This installs pytest, black, flake8, and mypy for testing and code quality.
+
+To check the installation, run the test suite.
+
+$ python tests/run_all_tests.py
+
+All tests should pass, indicating that the installation is successful.
+
+## Quick Start
+
+The quick start guide demonstrates the basic usage of Metanion. Start by importing the Metanion class and NumPy.
+
+from metanion import Metanion
+import numpy as np
+
+Generate some sample data. The data represents a linear relationship with noise.
+
+np.random.seed(42)
+X = np.random.randn(100, 2)
+y = 2*X[:,0] + 3*X[:,1] + 5 + 0.1*np.random.randn(100)
+
+Create a Metanion model. The default parameters work well for most problems.
+
+model = Metanion(verbose=True)
+model.fit(X, y, feature_names=["x0", "x1"])
+
+Print the discovered equation.
+
+print(model.explain())
+
+Make predictions on new data.
+
+test_X = np.array([[1.0, 2.0]])
+pred = model.predict(test_X)
+print(f"Prediction: {pred[0]:.2f}")
+
+Evaluate the model on the training data.
+
+mse = model.score(X, y)
+print(f"MSE: {mse:.6f}")
+
+Save the model for later use.
+
+model.save("my_model.metanion")
+
+Load the model from a file.
+
+model2 = Metanion()
+model2.load("my_model.metanion")
+print(model2.explain())
+
+Print a summary of the model.
+
+model.summary()
+
+This outputs the equation, fitness, depth, and node count.
+
+The complete example demonstrates the entire workflow from data generation to model deployment. The same pattern can be applied to any regression problem.
+
+## API Reference
+
+The Metanion class is the main entry point for the library. It provides a scikit-learn compatible interface.
+
+Metanion Parameters:
+
+pop_size - int, default 100. The population size for genetic programming. Larger populations explore more of the search space but are slower.
+
+generations - int, default 40. The number of generations to evolve. More generations allow for better convergence.
+
+max_depth - int, default 4. The maximum depth of expression trees. Deeper expressions can capture complex relationships but may overfit.
+
+add_bias - bool, default True. Whether to add a +1 constant to all expressions. This helps with models that have a bias term.
+
+optimize_constants - bool, default True. Whether to optimize constants using gradient descent after each generation.
+
+verbose - bool, default False. Whether to print progress during training.
+
+random_seed - int, default None. Random seed for reproducibility.
+
+Metanion Methods:
+
+fit(X, y, feature_names=None) - Train the model on data. X is the input data with shape (n_samples, n_features). y is the target with shape (n_samples,). feature_names is an optional list of feature names.
+
+predict(X) - Make predictions on new data. X is the input data with shape (n_samples, n_features). Returns predictions with shape (n_samples,).
+
+explain() - Get the discovered equation as a string. Returns the equation in human-readable format.
+
+score(X, y) - Compute the mean squared error on test data. Returns the MSE.
+
+summary() - Print a comprehensive summary of the model. This includes the equation, fitness, depth, and node count.
+
+save(filepath) - Save the model to a file. The file format is custom binary format.
+
+load(filepath) - Load a model from a file. Returns the loaded model.
+
+The Metanion class also provides access to internal attributes for advanced users.
+
+best_ - The best GP individual found during training.
+
+fitness_ - The fitness of the best individual.
+
+depth_ - The depth of the best expression.
+
+nodes_ - The number of nodes in the best expression.
+
+expression_ - The string representation of the best expression.
+
+These attributes can be accessed after training for analysis and debugging.
+
+## Operations Supported
+
+Metanion supports a comprehensive set of mathematical operations. These operations can be combined to form arbitrary expressions.
+
+Arithmetic Operations:
+- Addition: a + b
+- Subtraction: a - b
+- Multiplication: a * b
+- Division: a / b
+- Power: a ^ b
+- Negation: -a
+
+Trigonometric Operations:
+- Sine: sin(a)
+- Cosine: cos(a)
+- Tangent: tan(a)
+- Arcsine: asin(a)
+- Arccosine: acos(a)
+- Arctangent: atan(a)
+
+Hyperbolic Operations:
+- Hyperbolic Sine: sinh(a)
+- Hyperbolic Cosine: cosh(a)
+- Hyperbolic Tangent: tanh(a)
+- Inverse Hyperbolic Sine: asinh(a)
+- Inverse Hyperbolic Cosine: acosh(a)
+- Inverse Hyperbolic Tangent: atanh(a)
+
+Exponential and Logarithmic Operations:
+- Exponential: exp(a)
+- Natural Log: log(a)
+- Base-10 Log: log10(a)
+- expm1: exp(a) - 1 (stable)
+- log1p: log(1 + a) (stable)
+
+Power and Root Operations:
+- Square: square(a) = a * a
+- Cube: cube(a) = a * a * a
+- Square Root: sqrt(a)
+
+Special Operations:
+- Absolute Value: abs(a)
+- Inverse: inv(a) = 1 / a
+- Sigmoid: sigmoid(a) = 1 / (1 + exp(-a))
+- ReLU: relu(a) = max(0, a)
+- Leaky ReLU: leaky_relu(a) = a if a > 0 else 0.01*a
+- GELU: gelu(a) = a * Phi(a)
+- Swish: swish(a) = a * sigmoid(a)
+- Softplus: softplus(a) = log(1 + exp(a))
+- Error Function: erf(a)
+- Gamma Function: gamma(a)
+
+Composition Operation:
+- compose(f, g) = f(g(x))
+
+Reduction Operations:
+- Sum: sum(a) - sum of elements
+- Mean: mean(a) - mean of elements
+- Max: max(a) - maximum of elements
+- Min: min(a) - minimum of elements
+
+Logical Operations:
+- Where: where(cond, a, b) - a if cond else b
+- Greater: a > b
+- Less: a < b
+- Equal: a == b
+
+These operations are available for building expressions. The genetic programming engine automatically selects and combines these operations to fit the data.
+
+## Advanced Usage
+
+Advanced users can customize the genetic programming process. The Metanion class provides parameters for controlling the search.
+
+Larger Population Sizes:
+Increasing the population size improves exploration but increases computation time. For complex problems, a population size of 300 to 500 is recommended.
+
+More Generations:
+More generations allow for better convergence. For difficult problems, use 100 to 200 generations.
+
+Deeper Expressions:
+Increasing max_depth allows for more complex expressions. However, deeper expressions are more likely to overfit. A depth of 5 to 6 is usually sufficient.
+
+Custom Feature Names:
+Feature names can be provided to make the equations more readable. This is particularly useful for scientific applications.
+
+model.fit(X, y, feature_names=["temperature", "pressure", "humidity"])
+
+The discovered equation will use these names instead of generic x0, x1, x2.
+
+Controlling Randomness:
+Set random_seed for reproducible results. This is important for research and debugging.
+
+model = Metanion(random_seed=42)
+
+Verbose Mode:
+Enable verbose mode to track the progress of training. This prints the best fitness and equation every 10 generations.
+
+model = Metanion(verbose=True)
+
+Custom Fitness Function:
+Advanced users can customize the fitness function by subclassing the FitnessEvaluator class. This allows for domain-specific fitness metrics.
+
+Batch Training:
+For large datasets, use batch training to process data in chunks. This reduces memory usage and allows for progressive refinement.
+
+model.fit(X_train, y_train, batch_size=1000, epochs=10)
+
+Progressive Refinement:
+Train on small batches first, then refine on larger batches. This approach is faster and more stable.
+
+model.fit(X_small, y_small, epochs=20)
+model.fit(X_large, y_large, epochs=50)
+
+Ensemble Models:
+Train multiple models with different random seeds and combine their predictions. This reduces variance and improves accuracy.
+
+models = []
+for i in range(5):
+    model = Metanion(random_seed=i)
+    model.fit(X_train, y_train)
+    models.append(model)
+
+predictions = np.mean([model.predict(X_test) for model in models], axis=0)
+
+Feature Engineering:
+Add polynomial features to the input data to capture non-linear relationships. Metanion can also discover these relationships directly.
+
+X_poly = np.column_stack([X, X**2, X**3])
+model.fit(X_poly, y)
+
+Tensor Scale:
+For high-dimensional data, use the tensor scale approach. Discover equations for each row and column independently.
+
+for row in range(n_rows):
+    model = Metanion()
+    model.fit(X[row, :], y[row, :])
+    equations.append(model.explain())
+
+## Tensor Scale
+
+The tensor scale approach is designed for high-dimensional data. Instead of discovering one equation for the entire dataset, it discovers equations for each row and column of a tensor.
+
+The approach works as follows:
+
+1. Convert the data to a tensor. For example, a dataset with 100 samples and 100 features becomes a 100x100 tensor.
+
+2. For each row, discover an equation that predicts the row values from column indices. This gives 100 row equations.
+
+3. For each column, discover an equation that predicts the column values from row indices. This gives 100 column equations.
+
+4. Combine the row and column equations using composition. The final prediction is the composition of the row and column equations.
+
+The tensor scale approach has several advantages:
+
+Scalability - It can handle very high-dimensional data. The number of equations is proportional to the number of rows and columns, not the number of data points.
+
+Interpretability - Each equation is simple and interpretable. The row equations capture patterns across columns, and the column equations capture patterns across rows.
+
+Parallelization - The row and column equations can be discovered independently. This allows for parallel processing and faster training.
+
+Modularity - The discovered equations can be reused for new data. The row equations remain valid for new columns, and the column equations remain valid for new rows.
+
+The tensor scale approach is implemented in the research module. It can be applied to any tensor data, including images, time series, and scientific measurements.
+
+## Genetic Programming Engine
+
+The genetic programming engine is the core of Metanion. It evolves a population of expressions to fit the data.
+
+The engine uses the following components:
+
+Population - A set of individuals, each representing an expression tree. The population size is controlled by the pop_size parameter.
+
+Fitness Function - The fitness of an individual is the mean squared error on the training data. Lower MSE means better fitness.
+
+Selection - Individuals are selected for reproduction using tournament selection. The best individuals have a higher chance of being selected.
+
+Crossover - Two individuals exchange subtrees to create new offspring. This combines good features from both parents.
+
+Mutation - Individuals are randomly modified to introduce new variations. This maintains diversity in the population.
+
+Elitism - The best individuals are preserved across generations. This prevents the loss of good solutions.
+
+The engine evolves the population over multiple generations. Each generation, the population is evaluated, selected, and recombined to create a new population.
+
+The process stops when the maximum number of generations is reached or when the fitness stops improving.
+
+The Island GP variant runs multiple independent populations (islands) in parallel. Islands occasionally exchange individuals (migration) to share good solutions.
+
+The island model has several advantages:
+
+Diversity - Each island explores a different part of the search space. This increases overall diversity.
+
+Exploration - Islands are less likely to converge prematurely. They can escape local optima.
+
+Scalability - The island model can be parallelized easily. Each island can run on a separate processor.
+
+The genetic programming engine is implemented in the gp module. It provides a flexible framework for symbolic regression.
+
+## Tensor Scale
+
+The tensor scale approach is designed for high-dimensional data. Instead of discovering one equation for the entire dataset, it discovers equations for each row and column of a tensor.
+
+The approach works as follows:
+
+1. Convert the data to a tensor. For example, a dataset with 100 samples and 100 features becomes a 100x100 tensor.
+
+2. For each row, discover an equation that predicts the row values from column indices. This gives 100 row equations.
+
+3. For each column, discover an equation that predicts the column values from row indices. This gives 100 column equations.
+
+4. Combine the row and column equations using composition. The final prediction is the composition of the row and column equations.
+
+The tensor scale approach has several advantages:
+
+Scalability - It can handle very high-dimensional data. The number of equations is proportional to the number of rows and columns, not the number of data points.
+
+Interpretability - Each equation is simple and interpretable. The row equations capture patterns across columns, and the column equations capture patterns across rows.
+
+Parallelization - The row and column equations can be discovered independently. This allows for parallel processing and faster training.
+
+Modularity - The discovered equations can be reused for new data. The row equations remain valid for new columns, and the column equations remain valid for new rows.
+
+The tensor scale approach is implemented in the research module. It can be applied to any tensor data, including images, time series, and scientific measurements.
+
+## Genetic Programming Engine
+
+The genetic programming engine is the core of Metanion. It evolves a population of expressions to fit the data.
+
+The engine uses the following components:
+
+Population - A set of individuals, each representing an expression tree. The population size is controlled by the pop_size parameter.
+
+Fitness Function - The fitness of an individual is the mean squared error on the training data. Lower MSE means better fitness.
+
+Selection - Individuals are selected for reproduction using tournament selection. The best individuals have a higher chance of being selected.
+
+Crossover - Two individuals exchange subtrees to create new offspring. This combines good features from both parents.
+
+Mutation - Individuals are randomly modified to introduce new variations. This maintains diversity in the population.
+
+Elitism - The best individuals are preserved across generations. This prevents the loss of good solutions.
+
+The engine evolves the population over multiple generations. Each generation, the population is evaluated, selected, and recombined to create a new population.
+
+The process stops when the maximum number of generations is reached or when the fitness stops improving.
+
+The Island GP variant runs multiple independent populations (islands) in parallel. Islands occasionally exchange individuals (migration) to share good solutions.
+
+The island model has several advantages:
+
+Diversity - Each island explores a different part of the search space. This increases overall diversity.
+
+Exploration - Islands are less likely to converge prematurely. They can escape local optima.
+
+Scalability - The island model can be parallelized easily. Each island can run on a separate processor.
+
+The genetic programming engine is implemented in the gp module. It provides a flexible framework for symbolic regression.
+
+## Symbolic Regularization
+
+Symbolic regularization is a technique for controlling the complexity of discovered equations. It adapts the regularization penalty based on the data.
+
+The regularization has three components:
+
+Linearity Score - The linearity score measures how linear the data is. It is computed as the correlation between the input features and the target. A score close to 1 indicates linear data. A score close to 0 indicates non-linear data.
+
+Complexity Penalty - The complexity penalty is based on the linearity score. For linear data, the penalty is high, favoring simple expressions. For non-linear data, the penalty is low, allowing more complex expressions.
+
+Adaptive Max Depth - The maximum depth of expressions is adjusted based on the linearity score. Linear data uses a shallow depth (3). Non-linear data uses a deeper depth (5).
+
+The regularization works as follows:
+
+1. Compute the linearity score of the data.
+
+2. If the data is linear (score > 0.8), use a high complexity penalty and shallow depth. This prevents overfitting and keeps expressions simple.
+
+3. If the data is moderately non-linear (score > 0.5), use a moderate complexity penalty and medium depth.
+
+4. If the data is highly non-linear (score < 0.5), use a low complexity penalty and deep depth. This allows complex expressions to capture the non-linear patterns.
+
+The regularization is implemented in the SymbolicRegularization class. It can be used independently or as part of the GP engine.
+
+## Safe Operations
+
+Metanion uses safe operations to prevent mathematical errors. All operations are wrapped with safety checks.
+
+The safe operations include:
+
+safe_div(a, b) - Returns 0 if b is 0. Otherwise returns a / b. This prevents division by zero.
+
+safe_log(x) - Returns 0 if x <= 0. Otherwise returns log(x). This prevents log of negative numbers.
+
+safe_log10(x) - Returns 0 if x <= 0. Otherwise returns log10(x). This prevents log10 of negative numbers.
+
+safe_sqrt(x) - Returns 0 if x < 0. Otherwise returns sqrt(x). This prevents sqrt of negative numbers.
+
+safe_pow(base, exp) - Returns 0 if the operation is invalid. This prevents invalid power operations.
+
+safe_sin(x) - Returns sin(x) with error handling. This prevents domain errors.
+
+safe_cos(x) - Returns cos(x) with error handling. This prevents domain errors.
+
+safe_tan(x) - Returns tan(x) with error handling. This prevents domain errors.
+
+safe_exp(x) - Returns exp(x) with overflow protection. This prevents exponential overflow.
+
+safe_inv(x) - Returns 0 if x is 0. Otherwise returns 1/x. This prevents inverse of zero.
+
+safe_abs(x) - Returns abs(x) with error handling. This prevents domain errors.
+
+safe_square(x) - Returns x*x with error handling. This prevents overflow.
+
+safe_cube(x) - Returns x*x*x with error handling. This prevents overflow.
+
+The safe operations are used throughout the GP engine. They ensure that all expressions are numerically stable and valid.
+
+## Batch Training
+
+Batch training allows Metanion to handle large datasets. Instead of processing all data at once, it processes data in batches.
+
+The batch training algorithm works as follows:
+
+1. Split the training data into batches. Each batch contains a subset of the data.
+
+2. For each batch, train a model on the batch data.
+
+3. Use the model from the previous batch as a starting point for the next batch. This is called progressive refinement.
+
+4. After all batches are processed, the final model is the result of progressive refinement.
+
+The benefits of batch training include:
+
+Memory Efficiency - Only one batch is in memory at a time. This allows training on datasets that are larger than memory.
+
+Speed - Training on small batches is faster than training on the entire dataset. The total training time is reduced.
+
+Progressive Refinement - The model improves with each batch. Early batches provide a rough approximation, and later batches refine the solution.
+
+No Forgetting - The model retains what it learned from previous batches. There is no catastrophic forgetting.
+
+The batch training is implemented in the research module. It can be used for any dataset.
+
+## Progressive Refinement
+
+Progressive refinement is a technique for improving the accuracy of the discovered equation. It involves training on small batches first, then refining on larger batches.
+
+The algorithm works as follows:
+
+1. Start with a small batch of data. Train a model on this batch.
+
+2. Add more data to the training set. Refine the model on the expanded dataset.
+
+3. Repeat step 2 until all data is used.
+
+The progressive refinement has several advantages:
+
+Faster Convergence - The model converges faster than training on the full dataset directly.
+
+Better Solutions - The model explores the search space more thoroughly. It is less likely to get stuck in local optima.
+
+No Forgetting - The model retains what it learned from previous batches. There is no catastrophic forgetting.
+
+Stability - The model is more stable than training on the full dataset. The progressive approach smooths out noise.
+
+The progressive refinement is implemented in the research module. It can be used for any dataset.
+
+## Model Persistence
+
+Metanion models can be saved and loaded from files. This allows you to reuse trained models without retraining.
+
+The save method saves the model to a binary file.
+
+model.save("my_model.metanion")
+
+The file contains:
+- The expression handle
+- The expression tree
+- The fitness value
+- The depth and node count
+- The feature names
+- Model parameters
+
+The load method loads a model from a binary file.
+
+model2 = Metanion()
+model2.load("my_model.metanion")
+
+The loaded model is identical to the saved model. It can make predictions and explain the equation.
+
+The model persistence is implemented using pickle. The model data is serialized to a binary format.
+
+The file format is custom but compatible with Python's pickle protocol. This ensures compatibility across Python versions.
+
+Models can be shared by sharing the .metanion file. The file is typically small (a few kilobytes).
+
+The persistence is useful for:
+- Deploying models in production
+- Sharing models with collaborators
+- Archiving models for later use
+- Reproducing research results
+
+## Performance Optimization
+
+Metanion performance can be optimized for different scenarios. The following strategies can improve speed and accuracy.
+
+JIT Compilation - The JIT compiler converts expressions to Python bytecode. This makes inference fast. The compilation is automatic and transparent.
+
+Batch Size - For large datasets, use smaller batch sizes. This reduces memory usage and speeds up training.
+
+Population Size - For complex problems, use larger populations. For simple problems, use smaller populations.
+
+Generations - For complex problems, use more generations. For simple problems, use fewer generations.
+
+Max Depth - For simple problems, use shallow depths. For complex problems, use deeper depths.
+
+Polynomial Features - Adding polynomial features can improve accuracy. However, it increases the dimensionality of the problem.
+
+Feature Selection - Removing irrelevant features can improve performance. Use the discovered equation to identify important features.
+
+Parallel Processing - The island GP model can be parallelized. Each island can run on a separate processor.
+
+Caching - Cache the results of expensive operations. This avoids redundant computations.
+
+Early Stopping - Stop training early if the fitness stops improving. This saves time.
+
+Constant Optimization - Use gradient descent to optimize constants. This improves accuracy without increasing search time.
+
+Safe Operations - Use safe operations to prevent errors. This ensures stability.
+
+Recursion Safety - Use depth limits to prevent recursion errors. This ensures stability.
+
+The performance optimization strategies are implemented throughout the library. The default parameters work well for most problems.
+
+## Use Cases
+
+Metanion is suitable for a wide range of applications. The following use cases demonstrate its versatility.
+
+Scientific Discovery:
+Metanion can discover physical laws from experimental data. For example, it can rediscover the MOND formula for galaxy rotation. This is useful for physics, chemistry, and biology research.
+
+Engineering Systems:
+Metanion can discover control laws for engineering systems. For example, it can find the relationship between sensor readings and motor speed. This is useful for robotics, automation, and control engineering.
+
+Financial Modeling:
+Metanion can discover relationships in financial data. For example, it can find the relationship between stock prices and economic indicators. This is useful for quantitative finance and risk management.
+
+Healthcare Prediction:
+Metanion can discover risk factors for diseases. For example, it can find the relationship between patient data and disease risk. This is useful for medical research and personalized medicine.
+
+Climate Data Analysis:
+Metanion can discover patterns in climate data. For example, it can find the relationship between temperature and CO2 levels. This is useful for climate science and environmental monitoring.
+
+Industrial Process Control:
+Metanion can discover control laws for industrial processes. For example, it can find the relationship between process parameters and product quality. This is useful for manufacturing and quality control.
+
+Energy Management:
+Metanion can discover energy consumption patterns. For example, it can find the relationship between building parameters and energy usage. This is useful for energy efficiency and smart buildings.
+
+Traffic Prediction:
+Metanion can discover traffic flow patterns. For example, it can find the relationship between time of day and traffic congestion. This is useful for transportation planning.
+
+Marketing Analytics:
+Metanion can discover customer behavior patterns. For example, it can find the relationship between marketing spend and sales. This is useful for marketing optimization.
+
+Supply Chain Optimization:
+Metanion can discover supply chain patterns. For example, it can find the relationship between inventory levels and demand. This is useful for logistics and operations management.
+
+## Comparison with Other Libraries
+
+Metanion is compared with other popular machine learning libraries. The following table summarizes the key differences.
+
+scikit-learn:
+scikit-learn is a general-purpose machine learning library. It provides a wide range of algorithms. However, scikit-learn models are not interpretable. They store numerical weights.
+
+TensorFlow:
+TensorFlow is a deep learning library. It supports neural networks and automatic differentiation. However, TensorFlow models are black boxes. They are not interpretable.
+
+PyTorch:
+PyTorch is a deep learning library. It supports neural networks and automatic differentiation. However, PyTorch models are black boxes. They are not interpretable.
+
+GPy:
+GPy is a Gaussian process library. It provides probabilistic models. However, GPy models are not interpretable. They store numerical parameters.
+
+gplearn:
+gplearn is a genetic programming library. It discovers symbolic expressions. However, gplearn does not support multivariate regression. It does not have safe operations.
+
+Metanion:
+Metanion is a symbolic regression library. It discovers interpretable equations. It supports multivariate regression. It has safe operations and symbolic regularization.
+
+The key advantages of Metanion are:
+- Interpretability - Equations are human-readable
+- Safety - Safe operations prevent errors
+- Multivariate Support - Works with multiple features
+- Tensor Scale - Works with high-dimensional data
+- JIT Compilation - Fast inference
+- Symbolic Regularization - Adaptive complexity control
+
+The key limitations of Metanion are:
+- No GPU Support - Runs on CPU only
+- No Deep Learning - Not suitable for image recognition
+- No NLP - Not suitable for text processing
+- No Reinforcement Learning - Not suitable for decision making
+
+Metanion is best suited for problems where interpretability is important. It is ideal for scientific discovery and engineering applications.
+
+## License
+
+Metanion is released under the MIT License. The MIT License is a permissive open source license.
+
+The MIT License allows:
+- Commercial use - The software can be used in commercial products
+- Modification - The software can be modified and adapted
+- Distribution - The software can be redistributed
+- Private use - The software can be used privately
+
+The MIT License requires:
+- Copyright notice - The original copyright notice must be included
+- Permission notice - The permission notice must be included
+
+The full text of the MIT License is available in the LICENSE file.
+
+## Citation
+
+If you use Metanion in your research, please cite it. This helps to acknowledge the work and encourages development.
+
+The recommended citation is:
+
+Rohit Patra. (2026). Metanion: A Zero-Weight Symbolic Tensor Engine. Version 2.0.0. GitHub.
+
+The BibTeX entry is:
+
+@software{Metanion,
+  author = {Rohit Patra},
+  title = {Metanion: A Zero-Weight Symbolic Tensor Engine},
+  year = {2026},
+  url = {https://github.com/rohitpatraoutlook-dotcom/metanion},
+  version = {2.0.0}
+}
+
+The citation can be included in the bibliography of research papers. It provides proper attribution for the software.
+
+## Contributing
+
+Contributions to Metanion are welcome. The library is open source and community-driven.
+
+The contribution process is as follows:
+
+1. Fork the repository on GitHub.
+
+2. Create a feature branch for your changes.
+
+3. Make the changes in your branch.
+
+4. Test the changes thoroughly.
+
+5. Submit a pull request.
+
+The contribution guidelines are:
+
+- Code should be well-documented and tested.
+- Changes should not break existing functionality.
+- New features should be accompanied by tests.
+- Documentation should be updated for new features.
+
+The contribution areas include:
+- Bug fixes
+- New features
+- Documentation improvements
+- Test coverage
+- Performance optimization
+
+Contributors are acknowledged in the CONTRIBUTORS file. All contributions are appreciated.
+
+## Roadmap
+
+The roadmap outlines the planned development of Metanion.
+
+Version 2.0.0 - Current Version:
+- Full operation set (SQRT, POWER, LOG10, COMPOSE)
+- Safe operations
+- Symbolic Regularization
+- Constant penalty
+- COMPOSE operator
+- Recursion safety
+
+Version 2.1.0 - Upcoming:
+- Tensor Scale (100x100+ tensors)
+- Parallel processing for Island GP
+- Improved constant optimization
+- Additional operations
+
+Version 2.2.0 - Planned:
+- GPU acceleration (CUDA support)
+- Deep symbolic regression
+- Multi-output regression
+- Time series support
+
+Version 3.0.0 - Future:
+- Deep learning integration
+- AutoML capabilities
+- Web-based interface
+- Cloud deployment
+
+The roadmap is subject to change based on community feedback and development priorities.
+
+## Frequently Asked Questions
+
+Q: What is Metanion?
+A: Metanion is a zero-weight symbolic tensor engine for interpretable machine learning.
+
+Q: How does Metanion differ from neural networks?
+A: Metanion stores operation sequences instead of numerical weights. This makes it fully interpretable.
+
+Q: What kind of problems is Metanion suitable for?
+A: Metanion is suitable for regression problems where interpretability is important.
+
+Q: Does Metanion require a GPU?
+A: No, Metanion runs on CPU. GPU support is planned for future versions.
+
+Q: How fast is Metanion?
+A: Metanion uses JIT compilation for fast inference. Training time depends on the complexity of the problem.
+
+Q: Can Metanion handle large datasets?
+A: Yes, Metanion supports batch training and progressive refinement for large datasets.
+
+Q: What operations does Metanion support?
+A: Metanion supports arithmetic, trigonometric, hyperbolic, exponential, logarithmic, power, root, and composition operations.
+
+Q: Can Metanion models be saved and loaded?
+A: Yes, models can be saved to files and loaded later.
+
+Q: Is Metanion open source?
+A: Yes, Metanion is released under the MIT License.
+
+Q: How can I get help with Metanion?
+A: Help is available through the GitHub issues page and discussions.
+
+## Troubleshooting
+
+Common issues and their solutions:
+
+Issue: ImportError - cannot import name Metanion
+Solution: Ensure Metanion is installed correctly. Try reinstalling with pip.
+
+Issue: RecursionError - maximum recursion depth exceeded
+Solution: Reduce the max_depth parameter. The default is 4, which is safe.
+
+Issue: ValueError - CONST requires a value
+Solution: This is a bug fixed in version 2.0.0. Upgrade to the latest version.
+
+Issue: ModuleNotFoundError - No module named metanion
+Solution: Install Metanion using pip install metanion.
+
+Issue: AttributeError - object has no attribute 'fit'
+Solution: Ensure you are using the Metanion class correctly. Check the documentation.
+
+Issue: MemoryError - unable to allocate memory
+Solution: Reduce the population size or batch size. Use progressive refinement.
+
+Issue: RuntimeWarning - overflow encountered in square
+Solution: This is a warning, not an error. It can be ignored. It occurs with large numbers.
+
+Issue: TypeError - unsupported operand type(s) for +
+Solution: Ensure the input data is numeric. Convert categorical data to numeric.
+
+Issue: ValueError - shapes not aligned
+Solution: Ensure the input data has the correct shape. X should be (n_samples, n_features).
+
+Issue: KeyboardInterrupt - training interrupted
+Solution: Training can be interrupted with Ctrl+C. This is expected behavior.
+
+## Conclusion
+
+Metanion is a powerful tool for symbolic regression and interpretable machine learning. It discovers mathematical equations from data, providing human-readable and interpretable models.
+
+The library is designed for researchers, scientists, and engineers who need to understand the relationships in their data. It is particularly useful for scientific discovery and engineering applications.
+
+Metanion offers several advantages over traditional machine learning models:
+- Interpretability - Equations are human-readable
+- Safety - Safe operations prevent errors
+- Multivariate Support - Works with multiple features
+- Tensor Scale - Works with high-dimensional data
+- JIT Compilation - Fast inference
+- Symbolic Regularization - Adaptive complexity control
+
+The library is open source and available under the MIT License. It is actively developed and supported.
+
+Metanion is a valuable addition to the machine learning ecosystem. It bridges the gap between data-driven modeling and human understanding.
+
+We encourage you to try Metanion and contribute to its development. Your feedback and contributions are welcome.
+
+Thank you for using Metanion.
+
+## Links
+
+GitHub: https://github.com/rohitpatraoutlook-dotcom/metanion
+PyPI: https://pypi.org/project/metanion/
+Documentation: https://github.com/rohitpatraoutlook-dotcom/metanion#readme
+Issues: https://github.com/rohitpatraoutlook-dotcom/metanion/issues
+Discussions: https://github.com/rohitpatraoutlook-dotcom/metanion/discussions

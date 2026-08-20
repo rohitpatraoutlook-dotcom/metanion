@@ -7,34 +7,16 @@ import sys
 import os
 import pickle
 
-# Import from research module
+# Import from research module - absolute import
 try:
-    from research.metanion_research import run_gp, print_expr, test_expression
+    from research import run_gp, print_expr, test_expression
 except ImportError:
     try:
-        from metanion_research import run_gp, print_expr, test_expression
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from research import run_gp, print_expr, test_expression
     except ImportError:
-        print("Warning: metanion_research not found. Using fallback implementation.")
-        
-        def run_gp(X, y, **kwargs):
-            print("Running fallback GP...")
-            from metanion.gp.individual import GPIndividual
-            from metanion.symbolic import intern, OpID
-            from metanion.compile import compile_handle
-            import numpy as np
-            
-            expr = intern(OpID.IDENTITY)
-            ind = GPIndividual(weight_handles=[expr], bias_handle=None, shape=(1, 1))
-            ind.fitness = 0.0
-            ind.depth = 1
-            ind.node_count = 1
-            return ind
-        
-        def print_expr(handle, var_names=None):
-            return "x0"
-        
-        def test_expression(handle, X_test, y_true):
-            return 0.0, np.array([0.0])
+        print("ERROR: metanion_research not found. Please check installation.")
+        raise
 
 from metanion import compile_handle, intern, lookup, get_pool
 

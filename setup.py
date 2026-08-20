@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="metanion",
-    version="3.5.9",
+    version="4.0.0",
     author="Metanion Community",
     description="Zero-Weight Symbolic Tensor Engine with Knowledge Base",
     long_description=open("README.md").read(),
